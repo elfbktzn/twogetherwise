@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read their own data and create entries
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Entries: users can create, read their own, and read aggregated data
+    match /entries/{entryId} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || 
+         request.time.date() < resource.data.date);
+    }
+    
+    // Daily prompts: everyone can read
+    match /daily_prompts/{promptId} {
+      allow read: if true;
+    }
+    
+    // Emotion stats: everyone can read
+    match /emotion_daily_stats/{statId} {
+      allow read: if true;
+    }
+  }
+}
