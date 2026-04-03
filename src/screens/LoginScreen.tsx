@@ -11,12 +11,15 @@ import {
   Platform,
 } from 'react-native';
 import { loginWithEmail, loginAnonymously } from '@/services/authService';
+import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 import { AuthScreenProps } from '@/types/navigation';
+import { COLORS, FONTS } from '../../theme';
 
 export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const { promptAsync, isLoading: googleLoading } = useGoogleAuth();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -57,7 +60,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
         <TextInput
           style={styles.input}
           placeholder="Email"
-          placeholderTextColor="#888"
+          placeholderTextColor={COLORS.placeholderText}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -66,7 +69,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
         <TextInput
           style={styles.input}
           placeholder="Password"
-          placeholderTextColor="#888"
+          placeholderTextColor={COLORS.placeholderText}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -78,7 +81,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={COLORS.white} />
           ) : (
             <Text style={styles.primaryBtnText}>Log In</Text>
           )}
@@ -102,6 +105,15 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
         </View>
 
         <TouchableOpacity
+          style={styles.googleBtn}
+          onPress={() => promptAsync()}
+          disabled={googleLoading || loading}
+        >
+          <Text style={styles.googleBtnText}>G</Text>
+          <Text style={styles.googleBtnLabel}>Continue with Google</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={styles.anonymousBtn}
           onPress={handleAnonymous}
           disabled={loading}
@@ -116,7 +128,7 @@ export function LoginScreen({ navigation }: AuthScreenProps<'Login'>) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.bgPrimary,
   },
   inner: {
     flex: 1,
@@ -130,39 +142,41 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#fff',
+    fontFamily: FONTS.heading,
+    color: COLORS.textPrimary,
     textAlign: 'center',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 15,
-    color: '#aaa',
+    fontFamily: FONTS.text,
+    color: COLORS.textSecondary,
     textAlign: 'center',
     marginBottom: 36,
   },
   input: {
-    backgroundColor: '#16213e',
+    backgroundColor: COLORS.inputBg,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    color: '#fff',
+    color: COLORS.inputText,
+    fontFamily: FONTS.text,
     fontSize: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#2a2a4a',
+    borderColor: COLORS.cardBorderAuth,
   },
   primaryBtn: {
-    backgroundColor: '#e94560',
+    backgroundColor: COLORS.buttonPrimary,
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: 'center',
     marginTop: 8,
   },
   primaryBtnText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 17,
-    fontWeight: '600',
+    fontFamily: FONTS.heading,
   },
   secondaryBtn: {
     borderRadius: 12,
@@ -170,18 +184,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
     borderWidth: 1,
-    borderColor: '#e94560',
+    borderColor: COLORS.primary,
   },
   secondaryBtnText: {
-    color: '#e94560',
+    color: COLORS.primary,
     fontSize: 17,
-    fontWeight: '600',
+    fontFamily: FONTS.medium,
   },
   linkText: {
-    color: '#aaa',
+    color: COLORS.textTertiary,
     textAlign: 'center',
     marginTop: 16,
     fontSize: 14,
+    fontFamily: FONTS.text,
   },
   divider: {
     flexDirection: 'row',
@@ -191,24 +206,47 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#2a2a4a',
+    backgroundColor: COLORS.dividerLight,
   },
   dividerText: {
-    color: '#666',
+    color: COLORS.textTertiary,
     marginHorizontal: 12,
     fontSize: 13,
+    fontFamily: FONTS.text,
+  },
+  googleBtn: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.cardBorder,
+  },
+  googleBtnText: {
+    fontSize: 20,
+    fontFamily: FONTS.heading,
+    color: '#4285F4',
+    marginRight: 10,
+  },
+  googleBtnLabel: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontFamily: FONTS.medium,
   },
   anonymousBtn: {
-    backgroundColor: '#16213e',
+    backgroundColor: COLORS.cardBg,
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#2a2a4a',
+    borderColor: COLORS.cardBorderAuth,
   },
   anonymousBtnText: {
-    color: '#ccc',
+    color: COLORS.textSecondary,
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
   },
 });

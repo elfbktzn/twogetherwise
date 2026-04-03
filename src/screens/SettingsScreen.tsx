@@ -9,7 +9,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
-import { logout, changePassword } from '@/services/authService';
+import { logout, changePassword, deleteAccount } from '@/services/authService';
+import { COLORS, FONTS } from '../../theme';
 
 export function SettingsScreen() {
   const { firebaseUser, userProfile } = useAuth();
@@ -17,11 +18,49 @@ export function SettingsScreen() {
   const [loading, setLoading] = useState(false);
   const [showPasswordChange, setShowPasswordChange] = useState(false);
 
+  const [deleting, setDeleting] = useState(false);
+
   const handleLogout = () => {
     Alert.alert('Log Out', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Log Out', style: 'destructive', onPress: () => logout() },
     ]);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your account and all your data. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              'Are you absolutely sure?',
+              'All your entries and personal data will be permanently removed.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Delete Forever',
+                  style: 'destructive',
+                  onPress: async () => {
+                    setDeleting(true);
+                    try {
+                      await deleteAccount();
+                    } catch (err: any) {
+                      Alert.alert('Error', err.message);
+                      setDeleting(false);
+                    }
+                  },
+                },
+              ],
+            );
+          },
+        },
+      ],
+    );
   };
 
   const handleChangePassword = async () => {
@@ -68,7 +107,7 @@ export function SettingsScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="New password"
-                placeholderTextColor="#888"
+                placeholderTextColor={COLORS.placeholderText}
                 value={newPassword}
                 onChangeText={setNewPassword}
                 secureTextEntry
@@ -79,7 +118,7 @@ export function SettingsScreen() {
                 disabled={loading}
               >
                 {loading ? (
-                  <ActivityIndicator color="#fff" size="small" />
+                  <ActivityIndicator color={COLORS.white} size="small" />
                 ) : (
                   <Text style={styles.saveBtnText}>Save</Text>
                 )}
@@ -92,6 +131,18 @@ export function SettingsScreen() {
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
         <Text style={styles.logoutBtnText}>Log Out</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.deleteBtn}
+        onPress={handleDeleteAccount}
+        disabled={deleting}
+      >
+        {deleting ? (
+          <ActivityIndicator color={COLORS.red} size="small" />
+        ) : (
+          <Text style={styles.deleteBtnText}>Delete Account</Text>
+        )}
+      </TouchableOpacity>
     </View>
   );
 }
@@ -99,61 +150,64 @@ export function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.bgPrimary,
     paddingHorizontal: 20,
     paddingTop: 70,
   },
   heading: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#fff',
+    fontFamily: FONTS.heading,
+    color: COLORS.textPrimary,
     marginBottom: 24,
   },
   card: {
-    backgroundColor: '#16213e',
+    backgroundColor: COLORS.cardBg,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#2a2a4a',
+    borderColor: COLORS.cardBorder,
   },
   label: {
     fontSize: 13,
-    color: '#888',
+    fontFamily: FONTS.text,
+    color: COLORS.textTertiary,
     marginBottom: 4,
   },
   value: {
     fontSize: 16,
-    color: '#fff',
+    fontFamily: FONTS.medium,
+    color: COLORS.textPrimary,
   },
   actionText: {
     fontSize: 16,
-    color: '#e94560',
-    fontWeight: '500',
+    color: COLORS.primary,
+    fontFamily: FONTS.medium,
   },
   passwordSection: {
     marginTop: 12,
   },
   input: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.inputBg,
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: '#fff',
+    color: COLORS.inputText,
+    fontFamily: FONTS.text,
     fontSize: 15,
     borderWidth: 1,
-    borderColor: '#2a2a4a',
+    borderColor: COLORS.cardBorder,
   },
   saveBtn: {
-    backgroundColor: '#e94560',
+    backgroundColor: COLORS.buttonPrimary,
     borderRadius: 10,
     paddingVertical: 10,
     alignItems: 'center',
     marginTop: 10,
   },
   saveBtnText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: COLORS.white,
+    fontFamily: FONTS.heading,
     fontSize: 15,
   },
   logoutBtn: {
@@ -162,11 +216,24 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#e94560',
+    borderColor: COLORS.primary,
   },
   logoutBtnText: {
-    color: '#e94560',
+    color: COLORS.primary,
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: FONTS.medium,
+  },
+  deleteBtn: {
+    marginTop: 40,
+    borderRadius: 12,
+    paddingVertical: 15,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.red,
+  },
+  deleteBtnText: {
+    color: COLORS.red,
+    fontSize: 14,
+    fontFamily: FONTS.medium,
   },
 });

@@ -16,6 +16,7 @@ import { useSubmitEntry, useHasSubmittedToday } from '@/hooks/useEntry';
 import { useInsight } from '@/hooks/useInsight';
 import { MAX_ENTRY_LENGTH } from '@/config/constants';
 import { Emotion, EMOTION_COLORS, EMOTION_EMOJI } from '@/types';
+import { COLORS, FONTS } from '../../theme';
 
 export function DailyPromptScreen() {
   const [text, setText] = useState('');
@@ -50,7 +51,7 @@ export function DailyPromptScreen() {
   if (promptLoading || checkingSubmission) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#e94560" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -161,11 +162,11 @@ function InsightCard({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.bgPrimary,
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.bgPrimary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -175,53 +176,55 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   promptCard: {
-    backgroundColor: '#16213e',
+    backgroundColor: COLORS.cardBg,
     borderRadius: 16,
     padding: 24,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#2a2a4a',
+    borderColor: COLORS.cardBorder,
   },
   promptLabel: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#e94560',
+    fontFamily: FONTS.medium,
+    color: COLORS.primary,
     letterSpacing: 1.5,
     marginBottom: 12,
   },
   promptText: {
     fontSize: 22,
-    fontWeight: '600',
-    color: '#fff',
+    fontFamily: FONTS.heading,
+    color: COLORS.textPrimary,
     lineHeight: 30,
     marginBottom: 12,
   },
   promptDate: {
     fontSize: 13,
-    color: '#666',
+    fontFamily: FONTS.text,
+    color: COLORS.textTertiary,
   },
   writeCard: {
-    backgroundColor: '#16213e',
+    backgroundColor: COLORS.cardBg,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: '#2a2a4a',
+    borderColor: COLORS.cardBorder,
   },
   writeLabel: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#ccc',
+    fontFamily: FONTS.medium,
+    color: COLORS.textSecondary,
     marginBottom: 12,
   },
   textInput: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.inputBg,
     borderRadius: 12,
     padding: 16,
-    color: '#fff',
+    color: COLORS.inputText,
+    fontFamily: FONTS.text,
     fontSize: 16,
     minHeight: 120,
     borderWidth: 1,
-    borderColor: '#2a2a4a',
+    borderColor: COLORS.cardBorder,
   },
   inputFooter: {
     flexDirection: 'row',
@@ -230,11 +233,12 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   charCount: {
-    color: '#666',
+    color: COLORS.textTertiary,
     fontSize: 13,
+    fontFamily: FONTS.text,
   },
   submitBtn: {
-    backgroundColor: '#e94560',
+    backgroundColor: COLORS.buttonPrimary,
     borderRadius: 10,
     paddingHorizontal: 24,
     paddingVertical: 10,
@@ -243,17 +247,17 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   submitBtnText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: FONTS.heading,
   },
   insightCard: {
-    backgroundColor: '#16213e',
+    backgroundColor: COLORS.cardBg,
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#2a2a4a',
+    borderColor: COLORS.cardBorder,
   },
   insightEmoji: {
     fontSize: 56,
@@ -261,8 +265,8 @@ const styles = StyleSheet.create({
   },
   insightTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
+    fontFamily: FONTS.heading,
+    color: COLORS.textPrimary,
     marginBottom: 12,
   },
   emotionBadge: {
@@ -273,11 +277,11 @@ const styles = StyleSheet.create({
   },
   emotionBadgeText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontFamily: FONTS.heading,
     letterSpacing: 1,
   },
   insightStats: {
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.primaryLight,
     borderRadius: 12,
     padding: 16,
     width: '100%',
@@ -285,21 +289,23 @@ const styles = StyleSheet.create({
   },
   insightStatText: {
     fontSize: 16,
-    color: '#fff',
+    color: COLORS.textPrimary,
     textAlign: 'center',
-    fontWeight: '500',
+    fontFamily: FONTS.medium,
     lineHeight: 24,
   },
   insightSubText: {
     fontSize: 13,
-    color: '#888',
+    color: COLORS.textTertiary,
     textAlign: 'center',
     marginTop: 8,
+    fontFamily: FONTS.text,
   },
   insightNote: {
     fontSize: 13,
-    color: '#666',
+    color: COLORS.textTertiary,
     textAlign: 'center',
     fontStyle: 'italic',
+    fontFamily: FONTS.text,
   },
 });

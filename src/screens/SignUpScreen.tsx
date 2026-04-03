@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { signUpWithEmail } from '@/services/authService';
 import { AuthScreenProps } from '@/types/navigation';
+import { COLORS, FONTS } from '../../theme';
 
 export function SignUpScreen({ navigation }: AuthScreenProps<'SignUp'>) {
   const [email, setEmail] = useState('');
@@ -54,7 +55,7 @@ export function SignUpScreen({ navigation }: AuthScreenProps<'SignUp'>) {
         <TextInput
           style={styles.input}
           placeholder="Email"
-          placeholderTextColor="#888"
+          placeholderTextColor={COLORS.placeholderText}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -63,7 +64,7 @@ export function SignUpScreen({ navigation }: AuthScreenProps<'SignUp'>) {
         <TextInput
           style={styles.input}
           placeholder="Password"
-          placeholderTextColor="#888"
+          placeholderTextColor={COLORS.placeholderText}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -71,7 +72,7 @@ export function SignUpScreen({ navigation }: AuthScreenProps<'SignUp'>) {
         <TextInput
           style={styles.input}
           placeholder="Confirm Password"
-          placeholderTextColor="#888"
+          placeholderTextColor={COLORS.placeholderText}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
@@ -83,7 +84,7 @@ export function SignUpScreen({ navigation }: AuthScreenProps<'SignUp'>) {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={COLORS.white} />
           ) : (
             <Text style={styles.primaryBtnText}>Sign Up</Text>
           )}
@@ -100,7 +101,7 @@ export function SignUpScreen({ navigation }: AuthScreenProps<'SignUp'>) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.bgPrimary,
   },
   inner: {
     flex: 1,
@@ -109,44 +110,47 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#fff',
+    fontFamily: FONTS.heading,
+    color: COLORS.textPrimary,
     textAlign: 'center',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 15,
-    color: '#aaa',
+    fontFamily: FONTS.text,
+    color: COLORS.textSecondary,
     textAlign: 'center',
     marginBottom: 36,
   },
   input: {
-    backgroundColor: '#16213e',
+    backgroundColor: COLORS.inputBg,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    color: '#fff',
+    color: COLORS.inputText,
+    fontFamily: FONTS.text,
     fontSize: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#2a2a4a',
+    borderColor: COLORS.cardBorderAuth,
   },
   primaryBtn: {
-    backgroundColor: '#e94560',
+    backgroundColor: COLORS.buttonPrimary,
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: 'center',
     marginTop: 8,
   },
   primaryBtnText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 17,
-    fontWeight: '600',
+    fontFamily: FONTS.heading,
   },
   linkText: {
-    color: '#aaa',
+    color: COLORS.textTertiary,
     textAlign: 'center',
     marginTop: 20,
     fontSize: 14,
+    fontFamily: FONTS.text,
   },
 });

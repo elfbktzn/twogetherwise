@@ -9,8 +9,9 @@ import {
   GoogleAuthProvider,
   signInWithCredential,
   updatePassword,
+  deleteUser,
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, deleteDoc, collection, query, where, getDocs, writeBatch } from 'firebase/firestore';
 import { auth, db } from '@/config/firebase';
 import { COLLECTIONS } from '@/config/constants';
 import { User } from '@/types';
@@ -79,4 +80,26 @@ export async function getUserDocument(uid: string): Promise<User | null> {
 export async function updateOnboardingStatus(uid: string) {
   const userRef = doc(db, COLLECTIONS.USERS, uid);
   await setDoc(userRef, { onboardingCompleted: true }, { merge: true });
+}
+
+export async function deleteAccount() {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Not authenticated');
+
+  const uid = user.uid;
+
+  // 1. Delete user's entries
+  const entriesRef = collection(db, COLLECTIONS.ENTRIES);
+  const entriesQuery = query(entriesRef, where('userId', '==', uid));
+  const entriesSnap = await getDocs(entriesQuery);
+  const batch = writeBatch(db);
+  entriesSnap.docs.forEach((d) => batch.delete(d.ref));
+
+  // 2. Delete user document
+  batch.delete(doc(db, COLLECTIONS.USERS, uid));
+
+  await batch.commit();
+
+  // 3. Delete Firebase Auth account (must be last)
+  await deleteUser(user);
 }

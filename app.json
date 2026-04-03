@@ -40,7 +40,8 @@
     "plugins": [
       "expo-location",
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {

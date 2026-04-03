@@ -5,6 +5,7 @@ import { LoginScreen } from '@/screens/LoginScreen';
 import { SignUpScreen } from '@/screens/SignUpScreen';
 import { ForgotPasswordScreen } from '@/screens/ForgotPasswordScreen';
 import { OnboardingScreen } from '@/screens/OnboardingScreen';
+import { COLORS } from '../../theme';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -17,7 +18,7 @@ export function AuthNavigator({ showOnboarding }: Props) {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: '#1a1a2e' },
+        contentStyle: { backgroundColor: COLORS.bgPrimary },
       }}
       initialRouteName={showOnboarding ? 'Onboarding' : 'Login'}
     >

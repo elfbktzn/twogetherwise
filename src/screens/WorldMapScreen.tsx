@@ -10,6 +10,7 @@ import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useMapData } from '@/hooks/useMapData';
 import { MAP_INITIAL_REGION, getYesterdayDateString } from '@/config/constants';
 import { EMOTION_COLORS, EMOTION_EMOJI, EmotionDailyStat, Emotion } from '@/types';
+import { COLORS, FONTS } from '../../theme';
 
 const { width } = Dimensions.get('window');
 
@@ -37,7 +38,7 @@ export function WorldMapScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#e94560" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -133,11 +134,11 @@ const darkMapStyle = [
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.bgPrimary,
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.bgPrimary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -148,12 +149,13 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#fff',
+    fontFamily: FONTS.heading,
+    color: COLORS.textPrimary,
   },
   headerDate: {
     fontSize: 14,
-    color: '#888',
+    fontFamily: FONTS.text,
+    color: COLORS.textTertiary,
     marginTop: 2,
   },
   summaryBar: {
@@ -170,8 +172,8 @@ const styles = StyleSheet.create({
   },
   summaryPercent: {
     fontSize: 13,
-    color: '#ccc',
-    fontWeight: '600',
+    color: COLORS.textSecondary,
+    fontFamily: FONTS.medium,
     marginTop: 2,
   },
   mapContainer: {
@@ -187,11 +189,12 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(26,26,46,0.85)',
+    backgroundColor: 'rgba(247,245,242,0.9)',
   },
   emptyText: {
-    color: '#888',
+    color: COLORS.textTertiary,
     fontSize: 16,
+    fontFamily: FONTS.text,
     textAlign: 'center',
     lineHeight: 24,
   },

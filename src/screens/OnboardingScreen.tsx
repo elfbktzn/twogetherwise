@@ -9,6 +9,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { updateOnboardingStatus } from '@/services/authService';
 import { AuthScreenProps } from '@/types/navigation';
+import { COLORS, FONTS } from '../../theme';
 
 const { width } = Dimensions.get('window');
 
@@ -98,7 +99,7 @@ export function OnboardingScreen({ navigation }: AuthScreenProps<'Onboarding'>) 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: COLORS.bgPrimary,
     justifyContent: 'space-between',
   },
   slideContainer: {
@@ -113,14 +114,15 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 26,
-    fontWeight: '700',
-    color: '#fff',
+    fontFamily: FONTS.heading,
+    color: COLORS.textPrimary,
     textAlign: 'center',
     marginBottom: 12,
   },
   description: {
     fontSize: 16,
-    color: '#aaa',
+    fontFamily: FONTS.text,
+    color: COLORS.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -137,28 +139,29 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#2a2a4a',
+    backgroundColor: COLORS.cardBorder,
     marginHorizontal: 4,
   },
   dotActive: {
-    backgroundColor: '#e94560',
+    backgroundColor: COLORS.primary,
     width: 24,
   },
   nextBtn: {
-    backgroundColor: '#e94560',
+    backgroundColor: COLORS.buttonPrimary,
     borderRadius: 12,
     paddingVertical: 15,
     width: width - 64,
     alignItems: 'center',
   },
   nextBtnText: {
-    color: '#fff',
+    color: COLORS.white,
     fontSize: 17,
-    fontWeight: '600',
+    fontFamily: FONTS.heading,
   },
   skipText: {
-    color: '#666',
+    color: COLORS.textTertiary,
     marginTop: 16,
     fontSize: 14,
+    fontFamily: FONTS.text,
   },
 });
