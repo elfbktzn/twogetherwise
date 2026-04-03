@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Global Feelings Map",
-    "slug": "global-feelings-map",
+    "slug": "togetherwise",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,27 +9,44 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1a1a2e"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.globalfeelingsmap.app"
+      "bundleIdentifier": "com.twogetherwise.globalfeelingsmap",
+      "config": {
+        "googleMapsApiKey": "AIzaSyCOEz5JFn-z5HN5pBk93bbc88gIOaF69CQ"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#1a1a2e"
       },
-      "package": "com.globalfeelingsmap.app"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+      "package": "com.twogetherwise.globalfeelingsmap",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCOEz5JFn-z5HN5pBk93bbc88gIOaF69CQ"
+        }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "plugins": [
-      "expo-location"
-    ]
+      "expo-location",
+      "expo-asset",
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "3e9e6bbc-5a9e-44dc-b134-532ca3b3b88e"
+      }
+    },
+    "owner": "lfbktzn"
   }
 }

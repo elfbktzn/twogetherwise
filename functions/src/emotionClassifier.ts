@@ -1,10 +1,15 @@
-import { Emotion } from '@/types';
-
 /**
- * Placeholder emotion classifier.
- * Replace this with a real NLP API call (e.g., HuggingFace, OpenAI, Google NLP).
- * The abstraction layer makes it easy to swap implementations later.
+ * Placeholder emotion classifier for Cloud Functions (server-side).
+ * This mirrors the client-side classifier but runs on the backend
+ * for authoritative classification.
+ *
+ * TODO: Replace with a real NLP API call:
+ *   - HuggingFace Inference API
+ *   - OpenAI API
+ *   - Google Cloud Natural Language API
  */
+
+export type Emotion = 'joy' | 'sadness' | 'anxiety' | 'hope' | 'loneliness' | 'calm';
 
 interface ClassificationResult {
   emotion: Emotion;
@@ -20,6 +25,7 @@ const KEYWORD_MAP: Record<string, Emotion> = {
   amazing: 'joy',
   fantastic: 'joy',
   blessed: 'joy',
+  grateful: 'joy',
 
   sad: 'sadness',
   down: 'sadness',
@@ -28,6 +34,7 @@ const KEYWORD_MAP: Record<string, Emotion> = {
   heartbroken: 'sadness',
   miserable: 'sadness',
   grief: 'sadness',
+  hurt: 'sadness',
 
   anxious: 'anxiety',
   worried: 'anxiety',
@@ -36,6 +43,7 @@ const KEYWORD_MAP: Record<string, Emotion> = {
   panic: 'anxiety',
   overwhelmed: 'anxiety',
   fear: 'anxiety',
+  scared: 'anxiety',
 
   hopeful: 'hope',
   optimistic: 'hope',
@@ -44,6 +52,7 @@ const KEYWORD_MAP: Record<string, Emotion> = {
   forward: 'hope',
   believe: 'hope',
   dream: 'hope',
+  wish: 'hope',
 
   lonely: 'loneliness',
   alone: 'loneliness',
@@ -51,6 +60,7 @@ const KEYWORD_MAP: Record<string, Emotion> = {
   disconnected: 'loneliness',
   miss: 'loneliness',
   empty: 'loneliness',
+  abandoned: 'loneliness',
 
   calm: 'calm',
   peaceful: 'calm',
@@ -59,12 +69,10 @@ const KEYWORD_MAP: Record<string, Emotion> = {
   quiet: 'calm',
   content: 'calm',
   zen: 'calm',
+  still: 'calm',
 };
 
-export async function classifyEmotion(text: string): Promise<ClassificationResult> {
-  // TODO: Replace with real API call
-  // e.g., const result = await fetch('https://api.huggingface.co/...', { ... })
-
+export function classifyEmotion(text: string): ClassificationResult {
   const lowerText = text.toLowerCase();
   const emotionScores: Record<Emotion, number> = {
     joy: 0,

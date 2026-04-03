@@ -1,169 +1,121 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import { classifyEmotion } from './emotionClassifier';
 
 admin.initializeApp();
-
 const db = admin.firestore();
 
-// Emotion classification on entry creation
+/**
+ * Cloud Function 1: classifyEmotionOnWrite
+ * Triggered when a new entry is created in the 'entries' collection.
+ * Classifies the text and updates the entry document with the detected emotion.
+ * Then triggers the stats update.
+ */
 export const classifyEmotionOnWrite = functions.firestore
   .document('entries/{entryId}')
   .onCreate(async (snap, context) => {
-    const entry = snap.data();
-    
-    if (!entry.text) {
-      console.log('No text to classify');
-      return null;
-    }
+    const data = snap.data();
+    const text: string = data.text || '';
+    const entryId = context.params.entryId;
 
     try {
-      // Placeholder emotion classification
-      const emotion = await classifyEmotion(entry.text);
-      
-      // Update the entry with classified emotion
-      await snap.ref.update({ emotion });
-      
-      console.log(`Classified emotion: ${emotion} for entry: ${context.params.entryId}`);
-      
+      const result = classifyEmotion(text);
+
+      await db.collection('entries').doc(entryId).update({
+        emotion: result.emotion,
+        emotionConfidence: result.confidence,
+      });
+
       // Trigger stats update
-      await updateDailyStats(entry.date, emotion, entry.country);
-      
-      return { emotion };
+      await updateStats(data.date, result.emotion, data.country, data.lat, data.lng);
+
+      functions.logger.info(
+        `Classified entry ${entryId}: ${result.emotion} (${result.confidence})`
+      );
     } catch (error) {
-      console.error('Error classifying emotion:', error);
-      return null;
+      functions.logger.error(`Error classifying entry ${entryId}:`, error);
     }
   });
 
-// Update daily emotion statistics
-export const updateDailyStats = functions.https.onCall(async (data, context) => {
-  const { date, emotion, country } = data;
-  
-  if (!date || !emotion || !country) {
-    throw new functions.https.HttpsError('invalid-argument', 'Missing required fields');
+/**
+ * Cloud Function 2: updateDailyStats
+ * Can also be called as an HTTP function for manual re-aggregation.
+ */
+export const updateDailyStats = functions.https.onRequest(async (req, res) => {
+  const date = req.query.date as string;
+  if (!date) {
+    res.status(400).json({ error: 'date query param required (YYYY-MM-DD)' });
+    return;
   }
 
   try {
-    const statsRef = db.collection('emotion_daily_stats')
+    const entriesSnap = await db
+      .collection('entries')
       .where('date', '==', date)
-      .where('emotion', '==', emotion)
-      .where('country', '==', country)
-      .limit(1);
+      .where('emotion', '!=', null)
+      .get();
 
-    const snapshot = await statsRef.get();
-    
-    if (snapshot.empty) {
-      // Create new stats document
-      await db.collection('emotion_daily_stats').add({
+    // Aggregate by emotion + country
+    const aggregation: Record<string, { emotion: string; country: string; count: number; lat: number; lng: number }> = {};
+
+    entriesSnap.docs.forEach((doc) => {
+      const d = doc.data();
+      const key = `${d.emotion}_${d.country}`;
+      if (!aggregation[key]) {
+        aggregation[key] = {
+          emotion: d.emotion,
+          country: d.country,
+          count: 0,
+          lat: d.lat,
+          lng: d.lng,
+        };
+      }
+      aggregation[key].count += 1;
+    });
+
+    // Write aggregated stats
+    const batch = db.batch();
+    for (const [key, stat] of Object.entries(aggregation)) {
+      const docId = `${date}_${key}`;
+      const ref = db.collection('emotion_daily_stats').doc(docId);
+      batch.set(ref, { date, ...stat }, { merge: true });
+    }
+    await batch.commit();
+
+    res.json({ success: true, statsCount: Object.keys(aggregation).length });
+  } catch (error) {
+    functions.logger.error('Error in updateDailyStats:', error);
+    res.status(500).json({ error: 'Internal error' });
+  }
+});
+
+/**
+ * Helper: Update stats incrementally when a single entry is classified.
+ */
+async function updateStats(
+  date: string,
+  emotion: string,
+  country: string,
+  lat: number,
+  lng: number
+): Promise<void> {
+  const docId = `${date}_${emotion}_${country}`;
+  const ref = db.collection('emotion_daily_stats').doc(docId);
+
+  await db.runTransaction(async (transaction) => {
+    const doc = await transaction.get(ref);
+    if (doc.exists) {
+      const currentCount = doc.data()?.count || 0;
+      transaction.update(ref, { count: currentCount + 1 });
+    } else {
+      transaction.set(ref, {
         date,
         emotion,
         country,
         count: 1,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
+        lat,
+        lng,
       });
-    } else {
-      // Update existing stats
-      const doc = snapshot.docs[0];
-      await doc.ref.update({
-        count: admin.firestore.FieldValue.increment(1),
-        updatedAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-    }
-    
-    return { success: true };
-  } catch (error) {
-    console.error('Error updating daily stats:', error);
-    throw new functions.https.HttpsError('internal', 'Failed to update stats');
-  }
-});
-
-// Helper function to update daily stats (used internally)
-async function updateDailyStats(date: string, emotion: string, country: string) {
-  const statsRef = db.collection('emotion_daily_stats')
-    .where('date', '==', date)
-    .where('emotion', '==', emotion)
-    .where('country', '==', country)
-    .limit(1);
-
-  const snapshot = await statsRef.get();
-  
-  if (snapshot.empty) {
-    await db.collection('emotion_daily_stats').add({
-      date,
-      emotion,
-      country,
-      count: 1,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    });
-  } else {
-    const doc = snapshot.docs[0];
-    await doc.ref.update({
-      count: admin.firestore.FieldValue.increment(1),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    });
-  }
-}
-
-// Placeholder emotion classifier (replace with actual AI service)
-async function classifyEmotion(text: string): Promise<string> {
-  const lowerText = text.toLowerCase();
-  
-  if (lowerText.indexOf('happy') !== -1 || lowerText.indexOf('joy') !== -1 || lowerText.indexOf('excited') !== -1) {
-    return 'joy';
-  }
-  if (lowerText.indexOf('sad') !== -1 || lowerText.indexOf('depressed') !== -1 || lowerText.indexOf('down') !== -1) {
-    return 'sadness';
-  }
-  if (lowerText.indexOf('anxious') !== -1 || lowerText.indexOf('worried') !== -1 || lowerText.indexOf('nervous') !== -1) {
-    return 'anxiety';
-  }
-  if (lowerText.indexOf('hope') !== -1 || lowerText.indexOf('optimistic') !== -1 || lowerText.indexOf('looking forward') !== -1) {
-    return 'hope';
-  }
-  if (lowerText.indexOf('lonely') !== -1 || lowerText.indexOf('alone') !== -1 || lowerText.indexOf('isolated') !== -1) {
-    return 'loneliness';
-  }
-  if (lowerText.indexOf('calm') !== -1 || lowerText.indexOf('peaceful') !== -1 || lowerText.indexOf('relaxed') !== -1) {
-    return 'calm';
-  }
-  
-  // Default emotion
-  const emotions = ['joy', 'sadness', 'anxiety', 'hope', 'loneliness', 'calm'];
-  return emotions[Math.floor(Math.random() * emotions.length)];
-}
-
-// Create daily prompt (scheduled function)
-export const createDailyPrompt = functions.pubsub
-  .schedule('0 0 * * *') // Daily at midnight UTC
-  .timeZone('UTC')
-  .onRun(async (context) => {
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    
-    const prompts = [
-      "How are you feeling today?",
-      "What emotion is most present for you right now?",
-      "Describe your current emotional state in one sentence.",
-      "What's on your mind today?",
-      "How would you describe your mood at this moment?",
-      "What emotional color describes your day?",
-      "If your feelings had a weather forecast, what would it be?",
-      "What emotion is guiding your decisions today?"
-    ];
-    
-    const promptIndex = new Date().getDate() % prompts.length;
-    const promptText = prompts[promptIndex];
-    
-    try {
-      await db.collection('daily_prompts').add({
-        date: today,
-        text: promptText,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
-      });
-      
-      console.log(`Created daily prompt for ${today}: ${promptText}`);
-      return { success: true, date: today, prompt: promptText };
-    } catch (error) {
-      console.error('Error creating daily prompt:', error);
-      return null;
     }
   });
+}

@@ -1,92 +1,164 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
+import { useAuth } from '@/contexts/AuthContext';
+import { updateOnboardingStatus } from '@/services/authService';
+import { AuthScreenProps } from '@/types/navigation';
 
-interface OnboardingScreenProps {
-  onComplete: () => void;
-}
+const { width } = Dimensions.get('window');
 
-const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }) => {
+const SLIDES = [
+  {
+    emoji: '✍️',
+    title: 'Share How You Feel',
+    description:
+      'Each day, answer a simple prompt with one sentence about your emotions.',
+  },
+  {
+    emoji: '🤖',
+    title: 'AI Understands You',
+    description:
+      'Your words are analyzed to understand the emotion behind them.',
+  },
+  {
+    emoji: '🌍',
+    title: 'See the World',
+    description:
+      "The next day, explore a map showing how people around the world felt.",
+  },
+  {
+    emoji: '🤝',
+    title: "You're Not Alone",
+    description:
+      'Discover that others share your feelings. Connect through shared emotions.',
+  },
+];
+
+export function OnboardingScreen({ navigation }: AuthScreenProps<'Onboarding'>) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const { firebaseUser } = useAuth();
+
+  const handleNext = async () => {
+    if (currentSlide < SLIDES.length - 1) {
+      setCurrentSlide((prev) => prev + 1);
+    } else {
+      if (firebaseUser) {
+        await updateOnboardingStatus(firebaseUser.uid);
+      }
+    }
+  };
+
+  const slide = SLIDES[currentSlide];
+
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.logoContainer}>
-          <Text style={styles.logo}>🌍</Text>
-        </View>
-        
-        <Text style={styles.title}>Global Feelings Map</Text>
-        <Text style={styles.subtitle}>
-          Share how you feel and see emotions from around the world
-        </Text>
-        
-        <View style={styles.features}>
-          <Text style={styles.feature}>✨ Daily emotional prompts</Text>
-          <Text style={styles.feature}>🗺️ Global emotion visualization</Text>
-          <Text style={styles.feature}>💝 Anonymous and supportive community</Text>
-        </View>
+      <View style={styles.slideContainer}>
+        <Text style={styles.emoji}>{slide.emoji}</Text>
+        <Text style={styles.title}>{slide.title}</Text>
+        <Text style={styles.description}>{slide.description}</Text>
       </View>
-      
-      <TouchableOpacity style={styles.button} onPress={onComplete}>
-        <Text style={styles.buttonText}>Get Started</Text>
-      </TouchableOpacity>
+
+      <View style={styles.footer}>
+        <View style={styles.dots}>
+          {SLIDES.map((_, i) => (
+            <View
+              key={i}
+              style={[styles.dot, i === currentSlide && styles.dotActive]}
+            />
+          ))}
+        </View>
+
+        <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
+          <Text style={styles.nextBtnText}>
+            {currentSlide === SLIDES.length - 1 ? "Let's Go!" : 'Next'}
+          </Text>
+        </TouchableOpacity>
+
+        {currentSlide < SLIDES.length - 1 && (
+          <TouchableOpacity
+            onPress={async () => {
+              if (firebaseUser) {
+                await updateOnboardingStatus(firebaseUser.uid);
+              }
+            }}
+          >
+            <Text style={styles.skipText}>Skip</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#1a1a2e',
     justifyContent: 'space-between',
-    padding: 24,
   },
-  content: {
+  slideContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 40,
   },
-  logoContainer: {
+  emoji: {
+    fontSize: 72,
     marginBottom: 24,
   },
-  logo: {
-    fontSize: 80,
-  },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#2c3e50',
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#fff',
     textAlign: 'center',
     marginBottom: 12,
   },
-  subtitle: {
+  description: {
     fontSize: 16,
-    color: '#7f8c8d',
+    color: '#aaa',
     textAlign: 'center',
-    marginBottom: 40,
     lineHeight: 24,
   },
-  features: {
-    alignItems: 'flex-start',
-    width: '100%',
-    maxWidth: 300,
-  },
-  feature: {
-    fontSize: 16,
-    color: '#34495e',
-    marginBottom: 12,
-  },
-  button: {
-    backgroundColor: '#3498db',
-    paddingVertical: 16,
+  footer: {
     paddingHorizontal: 32,
-    borderRadius: 25,
+    paddingBottom: 50,
     alignItems: 'center',
-    marginBottom: 40,
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
+  dots: {
+    flexDirection: 'row',
+    marginBottom: 24,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#2a2a4a',
+    marginHorizontal: 4,
+  },
+  dotActive: {
+    backgroundColor: '#e94560',
+    width: 24,
+  },
+  nextBtn: {
+    backgroundColor: '#e94560',
+    borderRadius: 12,
+    paddingVertical: 15,
+    width: width - 64,
+    alignItems: 'center',
+  },
+  nextBtnText: {
+    color: '#fff',
+    fontSize: 17,
     fontWeight: '600',
   },
+  skipText: {
+    color: '#666',
+    marginTop: 16,
+    fontSize: 14,
+  },
 });
-
-export default OnboardingScreen;
